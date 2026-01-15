@@ -117,7 +117,7 @@ export class KindInstaller {
     if (selectedRelease) {
       return selectedRelease;
     }
-      throw new Error('No version selected');
+    throw new Error('No version selected');
   }
 
   // Get the asset id of a given release number for a given operating system and architecture

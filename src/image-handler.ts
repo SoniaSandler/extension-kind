@@ -42,7 +42,7 @@ export class ImageHandler {
     // but if there are multiple ones, prompt the user to select one
     if (clusters.length === 0) {
       throw new Error('No Kind clusters to push to');
-    } 
+    }
     if (clusters.length === 1) {
       selectedCluster = { label: clusters[0].name, engineType: clusters[0].engineType };
     } else {
