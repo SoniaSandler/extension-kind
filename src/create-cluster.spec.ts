@@ -343,6 +343,8 @@ test('expect cluster to be created with ports as numbers', async () => {
       httpsHostPort: 9444,
     }),
   );
+
+  console.log(vi.mocked(fs.promises.writeFile).mock.calls[0])
   expect(fs.promises.writeFile).toHaveBeenCalledWith(
     expect.anything(),
     expect.stringContaining(`
