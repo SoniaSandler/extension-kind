@@ -343,7 +343,7 @@ test('expect cluster to be created with ports as numbers', async () => {
       httpsHostPort: 9444,
     }),
   );
-  
+
   const data = vi.mocked(fs.promises.writeFile).mock.calls[0]?.[1] as string;
   expect(data.replace(/\r\n/g, '\n')).toStrictEqual(
     expect.stringContaining(`
