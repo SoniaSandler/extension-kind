@@ -90,7 +90,7 @@ const plugin = {
   },
   net: {
     getFreePort: vi.fn(),
-  }
+  },
 };
 
 module.exports = plugin;
