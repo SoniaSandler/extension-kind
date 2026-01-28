@@ -347,7 +347,7 @@ test('expect cluster to be created with ports as numbers', async () => {
   const data = vi.mocked(fs.promises.writeFile).mock.calls[0]?.[1] as String;
 
   console.log()
-  expect(data.replace(/\r\n/g, "\n")).toBe(
+  expect(data.replace(/\r\n/g, "\n")).toStrictEqual(
     expect.stringContaining(`
   - containerPort: 80
     hostPort: 9091
