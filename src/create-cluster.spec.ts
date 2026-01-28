@@ -344,17 +344,17 @@ test('expect cluster to be created with ports as numbers', async () => {
     }),
   );
 
-  console.log(vi.mocked(fs.promises.writeFile).mock.calls[0])
-  expect(fs.promises.writeFile).toHaveBeenCalledWith(
-    expect.anything(),
-    expect.stringContaining(
-  '- containerPort: 80' +
-  '  hostPort: 9091' +
-  '  protocol: TCP' +
-  '- containerPort: 443' +
-  '  hostPort: 9444' +
-  '  protocol: TCP'),
-    expect.anything(),
+  const data = vi.mocked(fs.promises.writeFile).mock.calls[0]?.[1] as String;
+
+  console.log()
+  expect(data.replace(/\r\n/g, "\n")).toBe(
+    expect.stringContaining(`
+  - containerPort: 80
+    hostPort: 9091
+    protocol: TCP
+  - containerPort: 443
+    hostPort: 9444
+    protocol: TCP`),
   );
 });
 
