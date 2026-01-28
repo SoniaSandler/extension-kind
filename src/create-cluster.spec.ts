@@ -306,8 +306,10 @@ test('expect cluster to be created with ports as strings', async () => {
       httpsHostPort: 9444,
     }),
   );
-  expect(fs.promises.writeFile).toHaveBeenCalledWith(
-    expect.anything(),
+  
+  const data = vi.mocked(fs.promises.writeFile).mock.calls[0]?.[1] as String;
+
+  expect(data.replace(/\r\n/g, "\n")).toStrictEqual(
     expect.stringContaining(`
   - containerPort: 80
     hostPort: 9091
@@ -315,7 +317,6 @@ test('expect cluster to be created with ports as strings', async () => {
   - containerPort: 443
     hostPort: 9444
     protocol: TCP`),
-    expect.anything(),
   );
 });
 
@@ -343,8 +344,10 @@ test('expect cluster to be created with ports as numbers', async () => {
       httpsHostPort: 9444,
     }),
   );
-  expect(fs.promises.writeFile).toHaveBeenCalledWith(
-    expect.anything(),
+
+  const data = vi.mocked(fs.promises.writeFile).mock.calls[0]?.[1] as String;
+
+  expect(data.replace(/\r\n/g, "\n")).toStrictEqual(
     expect.stringContaining(`
   - containerPort: 80
     hostPort: 9091
@@ -352,7 +355,6 @@ test('expect cluster to be created with ports as numbers', async () => {
   - containerPort: 443
     hostPort: 9444
     protocol: TCP`),
-    expect.anything(),
   );
 });
 
