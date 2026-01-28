@@ -349,15 +349,10 @@ test('expect cluster to be created with ports as numbers', async () => {
     expect.anything(),
     expect.stringContaining(`
   - containerPort: 80
-
     hostPort: 9091
-
     protocol: TCP
-
   - containerPort: 443
-
     hostPort: 9444
-    
     protocol: TCP`),
     expect.anything(),
   );
