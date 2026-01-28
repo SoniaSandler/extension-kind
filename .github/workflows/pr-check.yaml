@@ -20,7 +20,9 @@ name: pr-check
 permissions:
   contents: read
 
-on: [pull_request]
+on:
+  pull_request:
+    types: [labeled]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
