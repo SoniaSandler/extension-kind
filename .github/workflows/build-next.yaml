@@ -67,12 +67,33 @@ jobs:
           registry: ghcr.io/${{ github.repository_owner }}
   
   extension-image:
-    name: Build and publish extension OCI image
+    name: install Kind binary
+
+    name: Build and publish extension OCI image ${{ matrix.airgap == 'true' && '(Air Gap)' || ''  }}
     runs-on: ubuntu-24.04
     needs: builder-image
+    matrix:
+      airgap: ['true', 'false']
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Install Kind binary for airgapped image
+        if: ${{ matrix.airgap == 'true' }}
+        run: |
+          mkdir bin
+          curl -Lo ./bin/kind-linux-amd64 https://kind.sigs.k8s.io/dl/v0.31.0/kind-linux-amd64
+          chmod +x ./bin/kind-linux-amd64
+          curl -Lo ./bin/kind-linux-arm64 https://kind.sigs.k8s.io/dl/v0.31.0/kind-linux-arm64
+          chmod +x ./bin/kind-linux-arm64
+
+          curl -Lo ./bin/kind-darwin-amd64 https://kind.sigs.k8s.io/dl/v0.31.0/kind-darwin-amd64
+          chmod +x ./bin/kind-darwin-amd64
+          curl -Lo ./bin/kind-darwin-arm64 https://kind.sigs.k8s.io/dl/v0.31.0/kind-darwin-arm64
+          chmod +x ./bin/kind-darwin-arm64
+
+          curl -Lo ./bin/kind-windows-amd64.exe https://kind.sigs.k8s.io/dl/v0.31.0/kind-windows-amd64
+          chmod +x ./bin/kind-windows-amd64.exe
 
       - name: Install qemu dependency
         run: |
@@ -90,6 +111,7 @@ jobs:
             build/Containerfile
           context: .
           oci: true
+          build-args: AIRGAP=${{ matrix.airgap }}
 
       - name: Log in to ghcr.io
         uses: redhat-actions/podman-login@4934294ad0449894bcd1e9f191899d7292469603 # v1.7
