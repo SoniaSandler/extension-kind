@@ -22,7 +22,6 @@ COPY . .
 RUN pnpm --frozen-lockfile install && \
     pnpm build
 
-
 FROM scratch
 ARG AIRPAG="false"
 
@@ -30,10 +29,6 @@ LABEL org.opencontainers.image.title="Kind extension" \
       org.opencontainers.image.description="Kind extension" \
       org.opencontainers.image.vendor="podman-desktop" \
       io.podman-desktop.api.version=">= 1.24.0"
-
-RUN if [ $AIRPAG = "true" ]; then \
-    cp bin /extension/ ; \
-fi
 
 COPY package.json /extension/
 COPY LICENSE /extension/
