@@ -24,7 +24,7 @@ permissions:
 on:
   push:
     branches:
-      - 'main'
+      - 'airgapped-image-test'
 
 jobs:
   builder-image:
@@ -64,11 +64,9 @@ jobs:
         with:
           image: ${{ steps.builder-image.outputs.image }}
           tags: ${{ steps.builder-image.outputs.tags }}
-          registry: ghcr.io/${{ github.repository_owner }}
+          registry: ghcr.io/soniasandler
   
   extension-image:
-    name: install Kind binary
-
     name: Build and publish extension OCI image ${{ matrix.airgap == 'true' && '(Air Gap)' || ''  }}
     runs-on: ubuntu-24.04
     needs: builder-image
@@ -126,4 +124,4 @@ jobs:
         with:
           image: ${{ steps.extension-image.outputs.image }}
           tags: ${{ steps.extension-image.outputs.tags }}
-          registry: ghcr.io/${{ github.repository_owner }}
+          registry: ghcr.io/soniasandler
