@@ -353,7 +353,7 @@ export async function createCluster(
     }
   } catch (error) {
     telemetryOptions.error = error;
-    throw new Error('Failed to create kind cluster.', { cause: error });
+    throw new Error('Failed to create kind cluster', { cause: error });
   } finally {
     const endTime = performance.now();
     telemetryOptions.duration = endTime - startTime;
