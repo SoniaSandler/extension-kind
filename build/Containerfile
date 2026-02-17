@@ -17,7 +17,7 @@
 
 FROM ghcr.io/soniasandler/podman-desktop-kind-ext-builder:next AS builder
 
-ARG AIRPAG="false"
+ARG AIRGAP="false"
 
 COPY . .
 
@@ -27,7 +27,7 @@ RUN pnpm --frozen-lockfile install && \
 RUN mkdir /opt/app-root/extension && \
     cp -r dist /opt/app-root/extension/
 
-RUN if [ $AIRPAG = "true" ]; then \
+RUN if [ $AIRGAP = "true" ]; then \
     cp -r bin /opt/app-root/extension/ ; \
 fi
 
