@@ -26,6 +26,9 @@ on:
     branches:
       - 'main'
 
+env:
+  KIND_VERSION: v0.31.0
+
 jobs:
   builder-image:
     name: Build and publish builder OCI image
@@ -67,7 +70,7 @@ jobs:
           registry: ghcr.io/${{ github.repository_owner }}
   
   extension-image:
-    name: Build and publish extension OCI image ${{ matrix.airgap == 'true' && '(Air Gap)' || ''  }} (${{ matrix.os }}-${{ matrix.arch }})
+    name: Build extension OCI image ${{ matrix.airgap == 'true' && '(Air Gap)' || ''  }} (${{ matrix.os }}-${{ matrix.arch }})
     runs-on: ubuntu-24.04
     needs: builder-image
     strategy:
@@ -92,7 +95,7 @@ jobs:
           if [ "${{ matrix.os }}" = "windows" ]; then
             LOCAL_NAME="${LOCAL_NAME}.exe"
           fi
-          curl -Lo ./bin/${LOCAL_NAME} https://kind.sigs.k8s.io/dl/v0.31.0/${DOWNLOAD_NAME}
+          curl -Lo ./bin/${LOCAL_NAME} https://kind.sigs.k8s.io/dl/${{ env.KIND_VERSION }}/${DOWNLOAD_NAME}
           chmod +x ./bin/${LOCAL_NAME}
 
       - name: Install qemu dependency
@@ -105,7 +108,7 @@ jobs:
         uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2.13
         with:
           image: podman-desktop-kind-ext${{ matrix.airgap == 'true' && '-airgap' || ''  }}-${{ matrix.os }}-${{ matrix.arch }}
-          tags: next ${{ github.sha }}
+          tags: next-${{ matrix.os }}-${{ matrix.arch }} ${{ github.sha }}-${{ matrix.os }}-${{ matrix.arch }}
           archs: ${{ matrix.arch }}
           containerfiles: |
             build/Containerfile
@@ -129,4 +132,47 @@ jobs:
         with:
           image: ${{ steps.extension-image.outputs.image }}
           tags: ${{ steps.extension-image.outputs.tags }}
+          registry: ghcr.io/${{ github.repository_owner }}
+
+  create-manifest:
+    name: Create and publish manifest ${{ matrix.airgap == 'true' && '(Air Gap)' || ''  }}
+    runs-on: ubuntu-24.04
+    needs: extension-image
+    strategy:
+      matrix:
+        airgap: ['true', 'false']
+
+    steps:
+      - name: Log in to ghcr.io
+        uses: redhat-actions/podman-login@4934294ad0449894bcd1e9f191899d7292469603 # v1.7
+        with:
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ghcr.io
+
+      - name: Create manifest lists
+        run: |
+          IMAGE_BASE="ghcr.io/${{ github.repository_owner }}/podman-desktop-kind-ext${{ matrix.airgap == 'true' && '-airgap' || ''  }}"
+
+          # Create manifest for next tag
+          podman manifest create ${IMAGE_BASE}:next
+          podman manifest add ${IMAGE_BASE}:next ${IMAGE_BASE}-linux-amd64:next-linux-amd64 --os linux --arch amd64
+          podman manifest add ${IMAGE_BASE}:next ${IMAGE_BASE}-linux-arm64:next-linux-arm64 --os linux --arch arm64
+          podman manifest add ${IMAGE_BASE}:next ${IMAGE_BASE}-darwin-amd64:next-darwin-amd64 --os darwin --arch amd64
+          podman manifest add ${IMAGE_BASE}:next ${IMAGE_BASE}-darwin-arm64:next-darwin-arm64 --os darwin --arch arm64
+          podman manifest add ${IMAGE_BASE}:next ${IMAGE_BASE}-windows-amd64:next-windows-amd64 --os windows --arch amd64
+
+          # Create manifest for SHA tag
+          podman manifest create ${IMAGE_BASE}:${{ github.sha }}
+          podman manifest add ${IMAGE_BASE}:${{ github.sha }} ${IMAGE_BASE}-linux-amd64:${{ github.sha }}-linux-amd64 --os linux --arch amd64
+          podman manifest add ${IMAGE_BASE}:${{ github.sha }} ${IMAGE_BASE}-linux-arm64:${{ github.sha }}-linux-arm64 --os linux --arch arm64
+          podman manifest add ${IMAGE_BASE}:${{ github.sha }} ${IMAGE_BASE}-darwin-amd64:${{ github.sha }}-darwin-amd64 --os darwin --arch amd64
+          podman manifest add ${IMAGE_BASE}:${{ github.sha }} ${IMAGE_BASE}-darwin-arm64:${{ github.sha }}-darwin-arm64 --os darwin --arch arm64
+          podman manifest add ${IMAGE_BASE}:${{ github.sha }} ${IMAGE_BASE}-windows-amd64:${{ github.sha }}-windows-amd64 --os windows --arch amd64
+
+      - name: Push manifests to ghcr.io
+        uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2.8
+        with:
+          image: podman-desktop-kind-ext${{ matrix.airgap == 'true' && '-airgap' || ''  }}
+          tags: next ${{ github.sha }}
           registry: ghcr.io/${{ github.repository_owner }}
