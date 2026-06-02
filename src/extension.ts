@@ -405,7 +405,7 @@ async function registerCliTool(extensionContext: extensionApi.ExtensionContext):
   if (!binary) {
     console.log('no local binary')
     try {
-      binary = await getKindBinaryInfo(installer.getKindCliStoragePath());
+      binary = await getKindBinaryInfo(path.resolve(extensionContext.extensionUri.path, 'bin', 'kind'));
       console.log(binary)
       installationSource = 'extension';
     } catch (err: unknown) {
