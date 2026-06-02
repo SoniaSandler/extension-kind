@@ -403,8 +403,10 @@ async function registerCliTool(extensionContext: extensionApi.ExtensionContext):
 
   // if not installed system-wide: let's try to check in the extension storage if kind is not available system-wide
   if (!binary) {
+    console.log('no local binary')
     try {
       binary = await getKindBinaryInfo(installer.getKindCliStoragePath());
+      console.log(binary)
       installationSource = 'extension';
     } catch (err: unknown) {
       console.error(err);

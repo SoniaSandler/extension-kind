@@ -157,6 +157,7 @@ export class KindInstaller {
     if (extensionApi.env.isWindows) {
       fileExtension = '.exe';
     }
+    console.log('>>>> ' + path.resolve(storageBinFolder, `kind${fileExtension}`))
     return path.resolve(storageBinFolder, `kind${fileExtension}`);
   }
 
